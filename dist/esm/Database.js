@@ -1,5 +1,4 @@
 import { Kysely, PostgresDialect, CamelCasePlugin, SqliteAdapter } from 'kysely';
-import { Pool } from 'pg';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import model from './mixins/model';
 export default class Database {
@@ -17,15 +16,8 @@ export default class Database {
             this.kysely = config.kysely;
         }
         else {
-            const dialect = ('dialect' in config)
-                ? config.dialect
-                : new PostgresDialect({
-                    pool: new Pool({
-                        connectionString: config.connectionString,
-                    }),
-                });
             this.kysely = new Kysely({
-                dialect,
+                dialect: config.dialect,
                 plugins: [
                     new CamelCasePlugin(),
                 ],

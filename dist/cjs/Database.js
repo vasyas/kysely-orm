@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const kysely_1 = require("kysely");
-const pg_1 = require("pg");
 const node_async_hooks_1 = require("node:async_hooks");
 const model_1 = __importDefault(require("./mixins/model"));
 class Database {
@@ -22,15 +21,8 @@ class Database {
             this.kysely = config.kysely;
         }
         else {
-            const dialect = ('dialect' in config)
-                ? config.dialect
-                : new kysely_1.PostgresDialect({
-                    pool: new pg_1.Pool({
-                        connectionString: config.connectionString,
-                    }),
-                });
             this.kysely = new kysely_1.Kysely({
-                dialect,
+                dialect: config.dialect,
                 plugins: [
                     new kysely_1.CamelCasePlugin(),
                 ],

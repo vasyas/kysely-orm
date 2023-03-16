@@ -5,8 +5,6 @@ export declare type DatabaseConfig<DB> = {
     log?: (event: LogEvent) => void;
     debug?: boolean;
 } & ({
-    connectionString: string;
-} | {
     dialect: Dialect;
 } | {
     kysely: Kysely<DB>;

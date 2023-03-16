@@ -1,6 +1,5 @@
 import { Kysely, PostgresDialect, CamelCasePlugin, NoResultError, type LogEvent, type Dialect, SqliteAdapter } from 'kysely';
 import { type CommonTableExpression } from 'kysely/dist/cjs/parser/with-parser';
-import { Pool } from 'pg';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import model from './mixins/model';
 
@@ -9,8 +8,6 @@ export type DatabaseConfig<DB> = {
   log?: (event: LogEvent) => void;
   debug?: boolean;
 } & ({
-  connectionString: string;
-} | {
   dialect: Dialect;
 } | {
   kysely: Kysely<DB>;
@@ -48,16 +45,8 @@ export default class Database<DB> {
     if ('kysely' in config) {
       this.kysely = config.kysely;
     } else {
-      const dialect = ('dialect' in config)
-        ? config.dialect
-        : new PostgresDialect({
-          pool: new Pool({
-            connectionString: config.connectionString,
-          }),
-        });
-
       this.kysely = new Kysely<DB>({
-        dialect,
+        dialect: config.dialect,
         plugins: [
           new CamelCasePlugin(),
         ],
