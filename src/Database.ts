@@ -29,7 +29,7 @@ export default class Database<DB> {
 
   static readonly HasManyRelation = 1;
 
-  constructor(config: DatabaseConfig<DB>) {
+  constructor(config: DatabaseConfig<DB> = {}) {
     this.isolated = config.isolated ?? false;
   }
 

@@ -6,7 +6,7 @@ export default class Database {
     asyncLocalDb = new AsyncLocalStorage();
     isolated;
     static HasManyRelation = 1;
-    constructor(config) {
+    constructor(config = {}) {
         this.isolated = config.isolated ?? false;
     }
     setKysely(kysely) {

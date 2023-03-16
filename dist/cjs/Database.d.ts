@@ -14,7 +14,7 @@ export default class Database<DB> {
     private asyncLocalDb;
     readonly isolated: boolean;
     static readonly HasManyRelation = 1;
-    constructor(config: DatabaseConfig<DB>);
+    constructor(config?: DatabaseConfig<DB>);
     setKysely(kysely: Kysely<DB>): void;
     getKysely(): Kysely<DB>;
     get adapter(): import("kysely").DialectAdapter;

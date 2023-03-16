@@ -11,7 +11,7 @@ class Database {
     asyncLocalDb = new node_async_hooks_1.AsyncLocalStorage();
     isolated;
     static HasManyRelation = 1;
-    constructor(config) {
+    constructor(config = {}) {
         this.isolated = config.isolated ?? false;
     }
     setKysely(kysely) {
