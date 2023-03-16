@@ -165,13 +165,11 @@ export default function model<
     static async findOne<ColumnName extends keyof Table & string>(
       column: ColumnName,
       value: Readonly<SelectType<Table[ColumnName]>>,
-      func?: (qb: SelectQueryBuilder<DB, TableName, {}>) => SelectQueryBuilder<DB, TableName, {}>,
     ) {
       return this
         .selectFrom()
         .selectAll()
         .where(this.ref(column as string), '=', value)
-        // .if(!!func, (qb) => func?.(qb as unknown as SelectQueryBuilder<DB, TableName, {}>) as unknown as typeof qb)
         .limit(1)
         .executeTakeFirst();
     }
@@ -242,9 +240,8 @@ export default function model<
 
     static findById(
       id: Id,
-      func?: (qb: SelectQueryBuilder<DB, TableName, {}>) => SelectQueryBuilder<DB, TableName, {}>,
     ) {
-      return this.findOne(this.id, id, func);
+      return this.findOne(this.id, id);
     }
 
     static findByIds(

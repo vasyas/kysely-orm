@@ -87,12 +87,11 @@ function model(db, table, id, noResultError = kysely_1.NoResultError) {
                 .if(!!func, (qb) => func?.(qb))
                 .execute();
         }
-        static async findOne(column, value, func) {
+        static async findOne(column, value) {
             return this
                 .selectFrom()
                 .selectAll()
                 .where(this.ref(column), '=', value)
-                // .if(!!func, (qb) => func?.(qb as unknown as SelectQueryBuilder<DB, TableName, {}>) as unknown as typeof qb)
                 .limit(1)
                 .executeTakeFirst();
         }
@@ -141,8 +140,8 @@ function model(db, table, id, noResultError = kysely_1.NoResultError) {
                 .if(!!func, (qb) => func?.(qb))
                 .executeTakeFirstOrThrow(error);
         }
-        static findById(id, func) {
-            return this.findOne(this.id, id, func);
+        static findById(id) {
+            return this.findOne(this.id, id);
         }
         static findByIds(ids, func) {
             return this.find(this.id, ids, func);
