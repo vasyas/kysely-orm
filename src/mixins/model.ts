@@ -1,4 +1,4 @@
-import { type SelectType, type Updateable, type Insertable, type Selectable, NoResultError, type UpdateQueryBuilder, type SelectQueryBuilder, type DeleteQueryBuilder, type DeleteResult, type UpdateResult, type RawBuilder, sql, type MutationObject, type OnConflictDatabase, type OnConflictTables, OnConflictUpdateBuilder, JoinReferenceExpression } from 'kysely';
+import { type SelectType, type Updateable, type Insertable, type Selectable, NoResultError, type UpdateQueryBuilder, type SelectQueryBuilder, type DeleteQueryBuilder, type DeleteResult, type UpdateResult, type RawBuilder, sql, type UpdateObject, type OnConflictDatabase, type OnConflictTables, OnConflictUpdateBuilder, JoinReferenceExpression } from 'kysely';
 import { type CommonTableExpression } from 'kysely/dist/cjs/parser/with-parser';
 import type Database from '../Database';
 import { type TransactionCallback } from '../Database';
@@ -479,7 +479,7 @@ export default function model<
 
     static async upsert(
       values: Insertable<Table>,
-      upsertValues: MutationObject<OnConflictDatabase<DB, TableName>, OnConflictTables<TableName>, OnConflictTables<TableName>>,
+      upsertValues: UpdateObject<OnConflictDatabase<DB, TableName>, OnConflictTables<TableName>, OnConflictTables<TableName>>,
       conflictColumns: Readonly<(keyof Table & string)[]> | Readonly<keyof Table & string>,
       error: typeof NoResultError = this.noResultError,
     ) {
@@ -515,7 +515,7 @@ export default function model<
           .columns(Array.isArray(conflictColumns) ? conflictColumns : [conflictColumns])
           .doUpdateSet({
             [id]: (eb: any) => eb.ref(`excluded.${id}`)
-          } as MutationObject<OnConflictDatabase<DB, TableName>, OnConflictTables<TableName>, OnConflictTables<TableName>>) as OnConflictUpdateBuilder<DB, TableName>
+          } as UpdateObject<OnConflictDatabase<DB, TableName>, OnConflictTables<TableName>, OnConflictTables<TableName>>) as OnConflictUpdateBuilder<DB, TableName>
         )
         .returningAll()
         .executeTakeFirstOrThrow(error);
