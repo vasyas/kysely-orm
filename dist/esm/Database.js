@@ -1,40 +1,24 @@
-import { Kysely, PostgresDialect, CamelCasePlugin, SqliteAdapter } from 'kysely';
+import { PostgresDialect, SqliteAdapter } from 'kysely';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import model from './mixins/model';
 export default class Database {
-    kysely;
+    kysely = null;
     asyncLocalDb = new AsyncLocalStorage();
     isolated;
-    log;
-    debug;
     static HasManyRelation = 1;
     constructor(config) {
         this.isolated = config.isolated ?? false;
-        this.log = config.log;
-        this.debug = config.debug ?? false;
-        if ('kysely' in config) {
-            this.kysely = config.kysely;
-        }
-        else {
-            this.kysely = new Kysely({
-                dialect: config.dialect,
-                plugins: [
-                    new CamelCasePlugin(),
-                ],
-                log: (event) => {
-                    if (this.debug) {
-                        if (event.level === 'query') {
-                            console.log(event?.query?.sql);
-                            console.log(event?.query?.parameters);
-                        }
-                    }
-                    this.log?.(event);
-                },
-            });
-        }
+    }
+    setKysely(kysely) {
+        this.kysely = kysely;
+    }
+    getKysely() {
+        if (!this.kysely)
+            throw new Error("Database is not initialized. Call init() first.");
+        return this.kysely;
     }
     get adapter() {
-        return this.kysely.getExecutor().adapter;
+        return this.getKysely().getExecutor().adapter;
     }
     get isSqlite() {
         return this.adapter instanceof SqliteAdapter;
@@ -57,7 +41,7 @@ export default class Database {
     get db() {
         const transactionState = this.asyncLocalDb.getStore();
         if (!transactionState) {
-            return this.kysely;
+            return this.getKysely();
         }
         const { transaction, committed } = transactionState;
         if (committed) {

@@ -1,14 +1,8 @@
-import { Kysely, NoResultError, type LogEvent, type Dialect } from 'kysely';
+import { Kysely, NoResultError } from 'kysely';
 import { type CommonTableExpression } from 'kysely/dist/cjs/parser/with-parser';
 export declare type DatabaseConfig<DB> = {
     isolated?: boolean;
-    log?: (event: LogEvent) => void;
-    debug?: boolean;
-} & ({
-    dialect: Dialect;
-} | {
-    kysely: Kysely<DB>;
-});
+};
 declare type AfterCommitCallback = () => Promise<any>;
 declare type TransactionResponse<DB> = {
     transaction: Kysely<DB>;
@@ -19,10 +13,10 @@ export default class Database<DB> {
     private kysely;
     private asyncLocalDb;
     readonly isolated: boolean;
-    readonly log: ((event: LogEvent) => void) | undefined;
-    readonly debug: boolean;
     static readonly HasManyRelation = 1;
     constructor(config: DatabaseConfig<DB>);
+    setKysely(kysely: Kysely<DB>): void;
+    getKysely(): Kysely<DB>;
     get adapter(): import("kysely").DialectAdapter;
     get isSqlite(): boolean;
     get isPostgres(): boolean;

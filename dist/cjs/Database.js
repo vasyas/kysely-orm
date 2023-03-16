@@ -7,39 +7,23 @@ const kysely_1 = require("kysely");
 const node_async_hooks_1 = require("node:async_hooks");
 const model_1 = __importDefault(require("./mixins/model"));
 class Database {
-    kysely;
+    kysely = null;
     asyncLocalDb = new node_async_hooks_1.AsyncLocalStorage();
     isolated;
-    log;
-    debug;
     static HasManyRelation = 1;
     constructor(config) {
         this.isolated = config.isolated ?? false;
-        this.log = config.log;
-        this.debug = config.debug ?? false;
-        if ('kysely' in config) {
-            this.kysely = config.kysely;
-        }
-        else {
-            this.kysely = new kysely_1.Kysely({
-                dialect: config.dialect,
-                plugins: [
-                    new kysely_1.CamelCasePlugin(),
-                ],
-                log: (event) => {
-                    if (this.debug) {
-                        if (event.level === 'query') {
-                            console.log(event?.query?.sql);
-                            console.log(event?.query?.parameters);
-                        }
-                    }
-                    this.log?.(event);
-                },
-            });
-        }
+    }
+    setKysely(kysely) {
+        this.kysely = kysely;
+    }
+    getKysely() {
+        if (!this.kysely)
+            throw new Error("Database is not initialized. Call init() first.");
+        return this.kysely;
     }
     get adapter() {
-        return this.kysely.getExecutor().adapter;
+        return this.getKysely().getExecutor().adapter;
     }
     get isSqlite() {
         return this.adapter instanceof kysely_1.SqliteAdapter;
@@ -62,7 +46,7 @@ class Database {
     get db() {
         const transactionState = this.asyncLocalDb.getStore();
         if (!transactionState) {
-            return this.kysely;
+            return this.getKysely();
         }
         const { transaction, committed } = transactionState;
         if (committed) {
