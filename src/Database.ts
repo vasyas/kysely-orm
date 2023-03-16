@@ -1,17 +1,11 @@
-import { Kysely, PostgresDialect, CamelCasePlugin, NoResultError, type LogEvent, type Dialect, SqliteAdapter } from 'kysely';
-import { type CommonTableExpression } from 'kysely/dist/cjs/parser/with-parser';
-import { AsyncLocalStorage } from 'node:async_hooks';
+import {Kysely, NoResultError, PostgresDialect, SqliteAdapter} from 'kysely';
+import {type CommonTableExpression} from 'kysely/dist/cjs/parser/with-parser';
+import {AsyncLocalStorage} from 'node:async_hooks';
 import model from './mixins/model';
 
 export type DatabaseConfig<DB> = {
   isolated?: boolean;
-  log?: (event: LogEvent) => void;
-  debug?: boolean;
-} & ({
-  dialect: Dialect;
-} | {
-  kysely: Kysely<DB>;
-});
+};
 
 type AfterCommitCallback = () => Promise<any>;
 
@@ -29,43 +23,29 @@ type TransactionResponse<DB> = {
 export type TransactionCallback<DB, Type> = (trx: TransactionResponse<DB>) => Promise<Type>;
 
 export default class Database<DB> {
-  private kysely: Kysely<DB>;
+  private kysely: Kysely<DB> | null = null;
   private asyncLocalDb = new AsyncLocalStorage<TransactionState<DB>>();
   readonly isolated;
-  readonly log;
-  readonly debug;
 
   static readonly HasManyRelation = 1;
 
   constructor(config: DatabaseConfig<DB>) {
     this.isolated = config.isolated ?? false;
-    this.log = config.log;
-    this.debug = config.debug ?? false;
+  }
 
-    if ('kysely' in config) {
-      this.kysely = config.kysely;
-    } else {
-      this.kysely = new Kysely<DB>({
-        dialect: config.dialect,
-        plugins: [
-          new CamelCasePlugin(),
-        ],
-        log: (event) => {
-          if (this.debug) {
-            if (event.level === 'query') {
-              console.log(event?.query?.sql)
-              console.log(event?.query?.parameters)
-            }
-          }
+  setKysely(kysely: Kysely<DB>) {
+    this.kysely = kysely;
+  }
 
-          this.log?.(event);
-        },
-      });  
-    }
+  getKysely(): Kysely<DB> {
+    if (!this.kysely)
+      throw new Error("Database is not initialized. Call init() first.")
+
+    return this.kysely
   }
 
   get adapter() {
-    return this.kysely.getExecutor().adapter;
+    return this.getKysely().getExecutor().adapter;
   }
 
   get isSqlite() {
@@ -98,7 +78,7 @@ export default class Database<DB> {
   get db() {
     const transactionState = this.asyncLocalDb.getStore();
     if (!transactionState) {
-      return this.kysely;
+      return this.getKysely();
     }
 
     const { transaction, committed } = transactionState;
