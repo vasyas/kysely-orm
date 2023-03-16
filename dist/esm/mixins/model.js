@@ -87,7 +87,7 @@ export default function model(db, table, id, noResultError = NoResultError) {
                 .selectFrom()
                 .selectAll()
                 .where(this.ref(column), '=', value)
-                .if(!!func, (qb) => func?.(qb))
+                // .if(!!func, (qb) => func?.(qb as unknown as SelectQueryBuilder<DB, TableName, {}>) as unknown as typeof qb)
                 .limit(1)
                 .executeTakeFirst();
         }

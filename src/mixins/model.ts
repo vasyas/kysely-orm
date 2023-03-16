@@ -171,7 +171,7 @@ export default function model<
         .selectFrom()
         .selectAll()
         .where(this.ref(column as string), '=', value)
-        .if(!!func, (qb) => func?.(qb as unknown as SelectQueryBuilder<DB, TableName, {}>) as unknown as typeof qb)
+        // .if(!!func, (qb) => func?.(qb as unknown as SelectQueryBuilder<DB, TableName, {}>) as unknown as typeof qb)
         .limit(1)
         .executeTakeFirst();
     }
